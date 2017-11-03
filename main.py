@@ -56,8 +56,8 @@ class Workshop:
 		layer = self.iface.mapCanvas().currentLayer()
 		nodes = "";
 		
-		if not layer:
-			QMessageBox.information(None,"x","Select the nodelayer")
+		if not layer or not (layer.name() == 'node') :
+			QMessageBox.information(None,"Simulation","Select the nodelayer")
 			return
 		
 		selected = layer.selectedFeatures()
@@ -75,6 +75,7 @@ class Workshop:
 		nodes = nodes[:-1];
 		print nodes;
 		 	
+		#DataBaseInformation
 		db = QSqlDatabase('QPSQL')
 		if db.isValid():
    			db.setHostName('localhost')
@@ -112,19 +113,49 @@ class Workshop:
 	 	result = self.dlg.exec_()
 		
 		if result:
+			
+			layer = self.iface.mapCanvas().currentLayer()
+			if not (layer.name() == "edge_data") :
+				QMessageBox.information(None,"Simulation","Select the edge layer")
+				return
+		
 			table = self.dlg.comboBox.currentText()
 			attribute = self.dlg.comboBox_2.currentText()
 			criterium = self.dlg.comboBox_3.currentText()
 			topology = "gas_test"
 			
 			print "Simulation start"
+			result=[]
 			if db.open():
 	   			query = db.exec_(" select * from topology.simulate(\'" + nodes + "\',\'" + topology + "\',\'" + table + "\',\'" + attribute + "\',\'" + criterium + "\')")
 	   			while query.next():
-	   				record = query.record()
-	   				print record.value(0)
+	   				record = query.record()	   	
+	   				result.append(record.value(0))			
+	   			print "Simulation end"
+	   			layer = self.iface.mapCanvas().currentLayer()
 	   		
-	   		print "Simulation end"
+	   			idx2 = layer.fieldNameIndex('edge_id')
+	   			
+	   			
+	   			selection=[]
+	   			
+	   			for resulted in result:
+	   				request = QgsFeatureRequest().setFilterExpression(u'"edge_id" = ' + str(resulted))
+	   				request.setFlags(QgsFeatureRequest.NoGeometry).setSubsetOfAttributes(['id'], layer.fields())
+	   				for feature in layer.getFeatures(request):
+	   					selection.append(feature.id())
+	   				
+	   					
+	   			
+	   			#Find all edges that the simulation found and select them
+	   			#for feature in layer.getFeatures(request):
+	   				#if (feature.attributes()[idx2] in result):
+	   				#selection.append(feature.id())
+	   					
+	   					
+	   		layer.setSelectedFeatures(selection)
+	   		
+	   		print "Selection end"
 	   		
 	   	
 
