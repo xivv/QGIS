@@ -8,7 +8,9 @@ import resources
 from simulation_dlg import simulationDialog
 import simulation_dlg
 from ftplib import print_line
-
+from processing.core.Processing import Processing
+Processing.initialize()
+from processing.tools import *
 
 class Workshop:
 
@@ -52,7 +54,7 @@ class Workshop:
 		self.iface.removeToolBarIcon(self.action)
 		
 	def run(self):
-		
+	   	
 		layer = self.iface.mapCanvas().currentLayer()
 		nodes = "";
 		
@@ -132,9 +134,10 @@ class Workshop:
 	   				record = query.record()	   	
 	   				result.append(record.value(0))			
 	   			print "Simulation end"
+	   			
 	   			layer = self.iface.mapCanvas().currentLayer()
-	   		
 	   			idx2 = layer.fieldNameIndex('edge_id')
+	   			
 	   			
 	   			
 	   			selection=[]
@@ -154,8 +157,17 @@ class Workshop:
 	   					
 	   					
 	   		layer.setSelectedFeatures(selection)
-	   		
 	   		print "Selection end"
+	   		## Create Temporary Layer ##
+	   
+			temp = QgsVectorLayer("LineString?crs=epsg:31468",self.dlg.layer_name.text(), "memory")
+			temp_data = temp.dataProvider()
+			attr = layer.dataProvider().fields().toList()
+			temp_data.addAttributes(attr)
+			temp.updateFields()
+			temp_data.addFeatures(layer.selectedFeatures())
+			QgsMapLayerRegistry.instance().addMapLayer(temp)
+	   		print "Creation end"
 	   		
 	   	
 
