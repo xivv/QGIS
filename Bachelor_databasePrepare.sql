@@ -1,4 +1,4 @@
-﻿
+
 
 -- Create the topology with the name and the SRID
 SELECT CreateTopology('gas_simulation',31468);
@@ -16,6 +16,8 @@ SELECT AddTopoGeometryColumn('gas_simulation', 'gas_simulation', 'absperrarmatur
 
 -- Update the column with 
 UPDATE gas_simulation.absperrarmatur t SET g = CreateTopoGeom('gas_simulation',1,1,CAST ('{{' || (SELECT k.node_id[3]) || ',1}}' AS integer[])) FROM ga.sw_gis_point k where k.rwo_id = t.rwo_id and k.app_code = 1;
+UPDATE gas_simulation.absperrarmatur t SET g = CreateTopoGeom('gas_simulation',1,1,CAST ('{{' || (SELECT k.node_id[3]) || ',1}}' AS integer[])) FROM ga.sw_gis_point k where k.rwo_id = t.rwo_id and k.app_code = 6;
+UPDATE gas_simulation.absperrarmatur t SET g = CreateTopoGeom('gas_simulation',1,1,CAST ('{{' || (SELECT k.node_id[3]) || ',1}}' AS integer[])) FROM ga.sw_gis_point k where k.rwo_id = t.rwo_id and k.app_code = 7;
 
 -- Add missing system_id to the absperrarmatur table
 ALTER TABLE gas_simulation.absperrarmatur ADD COLUMN system_id INTEGER;
@@ -27,3 +29,4 @@ UPDATE gas_simulation.absperrarmatur SET system_id = nextval('gas_simulation.tes
 
 INSERT INTO gas_simulation.absperrarmatur (g,armaturenstellung) VALUES(CreateTopoGeom('gas_simulation',1,1,'{{437082429,1}}'),'geschlossen');
 INSERT INTO gas_simulation.absperrarmatur (g,armaturenstellung) VALUES(CreateTopoGeom('gas_simulation',1,1,'{{11865607,1}}'),'geschlossen');
+
